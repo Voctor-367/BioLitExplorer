@@ -12,7 +12,7 @@ load_dotenv()
 logging.basicConfig(level=logging.ERROR)
 
 # Azure Cosmos DB configuration
-COSMOS_DB_URL=st.secrets("COSMOSDB_ENDPOINT")
+COSMOS_DB_URL=st.secrets["COSMOSDB_ENDPOINT"]
 DATABASE_NAME = "biolit"
 
 cosmos_client = None

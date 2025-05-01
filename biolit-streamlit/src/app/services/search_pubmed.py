@@ -22,8 +22,8 @@ except ImportError:
 
 # --- Configuração Entrez ---
 # (Como antes)
-NCBI_EMAIL=st.secrets("NCBI_EMAIL", "seu_email_dedicado@exemplo.com")
-NCBI_API_KEY=st.secrets("NCBI_API_KEY", None)
+NCBI_EMAIL=st.secrets["NCBI_EMAIL", "seu_email_dedicado@exemplo.com"]
+NCBI_API_KEY=st.secrets["NCBI_API_KEY", None]
 
 if not NCBI_EMAIL or NCBI_EMAIL == "seu_email_dedicado@exemplo.com":
    raise ValueError("ERRO CRÍTICO: Email do Entrez (NCBI_EMAIL) não configurado!")

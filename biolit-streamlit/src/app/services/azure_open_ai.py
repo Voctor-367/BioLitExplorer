@@ -23,7 +23,7 @@ azure_ad_token = get_azure_ad_token()
  
 try:
     azure_openai_api_version = "2024-12-01-preview"
-    azure_deployment_name = model=st.secrets("AZURE_OPENAI_COMPLETIONSDEPLOYMENTID")
+    azure_deployment_name = model=st.secrets["AZURE_OPENAI_COMPLETIONSDEPLOYMENTID"]
     openai_model = AzureChatOpenAI(
         azure_deployment=azure_deployment_name,
         api_version=azure_openai_api_version,
@@ -33,7 +33,7 @@ try:
     aoai_client = AzureOpenAI(
         azure_ad_token=azure_ad_token,
         api_version="2024-12-01-preview",
-        azure_endpoint=st.secrets("AZURE_OPENAI_ENDPOINT")
+        azure_endpoint=st.secrets["AZURE_OPENAI_ENDPOINT"]
     )
     print("[DEBUG] Azure OpenAI model initialized successfully.")
 except Exception as e:

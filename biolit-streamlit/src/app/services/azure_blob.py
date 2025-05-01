@@ -16,8 +16,8 @@ except Exception as e:
 
 
 # --- Blob Storage Client (SYNCHRONOUS) ---
-STORAGE_ACCOUNT_URL=st.secrets("AZURE_STORAGE_ACCOUNT_URL")
-STORAGE_CONTAINER_NAME=st.secrets("AZURE_STORAGE_CONTAINER_NAME", "user-datasets") # Default container name
+STORAGE_ACCOUNT_URL=st.secrets["AZURE_STORAGE_ACCOUNT_URL"]
+STORAGE_CONTAINER_NAME=st.secrets["AZURE_STORAGE_CONTAINER_NAME", "user-datasets"] # Default container name
 
 blob_service_client_sync = None # Initialize sync client variable
 

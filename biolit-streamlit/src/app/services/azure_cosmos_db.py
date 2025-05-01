@@ -1,8 +1,6 @@
 import logging
-import os
+import streamlit as st
 from datetime import datetime
-import base64
-import json
 from azure.cosmos import exceptions
 from azure.cosmos import CosmosClient, exceptions
 from azure.identity import DefaultAzureCredential
@@ -14,7 +12,7 @@ load_dotenv()
 logging.basicConfig(level=logging.ERROR)
 
 # Azure Cosmos DB configuration
-COSMOS_DB_URL = os.getenv("COSMOSDB_ENDPOINT")
+COSMOS_DB_URL=st.secrets("COSMOSDB_ENDPOINT")
 DATABASE_NAME = "biolit"
 
 cosmos_client = None

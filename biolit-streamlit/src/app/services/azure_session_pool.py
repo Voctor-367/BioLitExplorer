@@ -1,4 +1,4 @@
-import os
+import streamlit as st
 import logging
 from azure.mgmt.appcontainers import ContainerAppsAPIClient
 from azure.identity import DefaultAzureCredential
@@ -24,21 +24,16 @@ class AzureSessionPoolManager:
                 "AZURE_OPENAI_POOL_NAME"
             ]
 
-            for var in required_env_vars:
-                if var not in os.environ:
-                    raise ValueError(f"Environment variable {var} not found")
-                # Environment variable {var} found: {os.environ[var]}
-
             # Creating ContainerAppsClient
             self.container_apps_client = ContainerAppsAPIClient(
                 credential=self.credential,
-                subscription_id=os.environ["AZURE_SUBSCRIPTION_ID"]
+                subscription_id=st.secrets["AZURE_SUBSCRIPTION_ID"]
             )
             # ContainerAppsClient created successfully
 
-            self.resource_group = os.environ["AZURE_RESOURCE_GROUP"]
-            self.pool_management_endpoint = os.environ["POOL_MANAGEMENT_ENDPOINT"]
-            self.pool_name = os.environ["AZURE_OPENAI_POOL_NAME"]
+            self.resource_group=st.secrets["AZURE_RESOURCE_GROUP"]
+            self.pool_management_endpoint=st.secrets["POOL_MANAGEMENT_ENDPOINT"]
+            self.pool_name=st.secrets["AZURE_OPENAI_POOL_NAME"]
 
             # AzureSessionPoolManager initialized successfully
             # Resource Group: {self.resource_group}

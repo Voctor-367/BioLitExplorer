@@ -1,21 +1,9 @@
-import os
-import sys
+import streamlit as st  
 import time
 from Bio import Entrez
 import xml.etree.ElementTree as ET
 from typing import List, Dict, Optional
 
-# --- Adicionar Raiz do Projeto ao sys.path ---
-# (Mantendo sua lógica de ajuste de path)
-current_script_path = os.path.abspath(__file__)
-src_root = current_script_path
-while os.path.basename(src_root) != 'src' and os.path.dirname(src_root) != src_root:
-    src_root = os.path.dirname(src_root)
-if os.path.basename(src_root) == 'src' and src_root not in sys.path:
-    project_root_dir = os.path.dirname(src_root)
-    if project_root_dir not in sys.path: sys.path.insert(0, project_root_dir)
-    if src_root not in sys.path: sys.path.insert(1, src_root)
-else: pass
 
 # --- Importar Funções de Enriquecimento ---
 # (Mantendo sua lógica de importação com fallback)
@@ -34,8 +22,8 @@ except ImportError:
 
 # --- Configuração Entrez ---
 # (Como antes)
-NCBI_EMAIL = os.getenv("NCBI_EMAIL", "seu_email_dedicado@exemplo.com")
-NCBI_API_KEY = os.getenv("NCBI_API_KEY", None)
+NCBI_EMAIL=st.secrets("NCBI_EMAIL", "seu_email_dedicado@exemplo.com")
+NCBI_API_KEY=st.secrets("NCBI_API_KEY", None)
 
 if not NCBI_EMAIL or NCBI_EMAIL == "seu_email_dedicado@exemplo.com":
    raise ValueError("ERRO CRÍTICO: Email do Entrez (NCBI_EMAIL) não configurado!")

@@ -1,12 +1,9 @@
-import os
-from dotenv import load_dotenv
+import streamlit as st
 # Import the SYNCHRONOUS client
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient # Synchronous client
 
 # Load environment variables
-load_dotenv()
-
 
 # --- Authentication ---
 try:
@@ -19,8 +16,8 @@ except Exception as e:
 
 
 # --- Blob Storage Client (SYNCHRONOUS) ---
-STORAGE_ACCOUNT_URL = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
-STORAGE_CONTAINER_NAME = os.getenv("AZURE_STORAGE_CONTAINER_NAME", "user-datasets") # Default container name
+STORAGE_ACCOUNT_URL=st.secrets("AZURE_STORAGE_ACCOUNT_URL")
+STORAGE_CONTAINER_NAME=st.secrets("AZURE_STORAGE_CONTAINER_NAME", "user-datasets") # Default container name
 
 blob_service_client_sync = None # Initialize sync client variable
 

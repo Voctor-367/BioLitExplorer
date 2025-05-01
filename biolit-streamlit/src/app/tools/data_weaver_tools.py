@@ -9,8 +9,8 @@ load_dotenv()
 # Initialize the SessionsPythonREPLTool for code execution in session pool
 try:
     code_interpreter = SessionsPythonREPLTool(
-        pool_management_endpoint==st.secrets["POOL_MANAGEMENT_ENDPOINT"], 
-        pool_name==st.secrets["AZURE_OPENAI_POOL_NAME"],
+        pool_management_endpoint=st.secrets["POOL_MANAGEMENT_ENDPOINT"], 
+        pool_name=st.secrets["AZURE_OPENAI_POOL_NAME"],
         return_direct=True,  # Retorna o resultado diretamente
         include_code=True,   # Inclui o código executado no retorno
         show_tool_use=True   # Mostra explicitamente o uso da ferramenta

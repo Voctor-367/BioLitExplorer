@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from typing import List, Dict, Optional
 
 
-# --- Import Enrichment Functions ---
+# --- Import query enrichment agent node ---
 try:
     from src.app.graphs.query_enricher import get_query_enrichment_chain, enrich_query
     ENRICHMENT_ENABLED = True

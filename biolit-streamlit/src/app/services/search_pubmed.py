@@ -5,8 +5,7 @@ import xml.etree.ElementTree as ET
 from typing import List, Dict, Optional
 
 
-# --- Importar Funções de Enriquecimento ---
-# (Mantendo sua lógica de importação com fallback)
+# --- Import Enrichment Functions ---
 try:
     from src.app.graphs.query_enricher import get_query_enrichment_chain, enrich_query
     ENRICHMENT_ENABLED = True
@@ -15,44 +14,40 @@ except ImportError:
         from src.app.graps.query_enricher import get_query_enrichment_chain, enrich_query
         ENRICHMENT_ENABLED = True
     except ImportError:
-         print("[AVISO] Falha ao importar query_enricher. O enriquecimento será desabilitado.")
          ENRICHMENT_ENABLED = False
          def get_query_enrichment_chain(): return None
          def enrich_query(q, c): return q
 
-# --- Configuração Entrez ---
+# --- Entrez configuration ---
 # (Como antes)
 NCBI_EMAIL=st.secrets["NCBI_EMAIL"]
 NCBI_API_KEY=st.secrets["NCBI_API_KEY"]
 
 if not NCBI_EMAIL or NCBI_EMAIL == "seu_email_dedicado@exemplo.com":
-   raise ValueError("ERRO CRÍTICO: Email do Entrez (NCBI_EMAIL) não configurado!")
+   raise ValueError("CRITICAL ERROR: Entrez email (NCBI_EMAIL) not configured")
 Entrez.email = NCBI_EMAIL
 if NCBI_API_KEY: Entrez.api_key = NCBI_API_KEY
-else: print("[AVISO] API Key do NCBI não configurada. Usando limites de taxa menores.")
+else: print("[WARNING] NCBI API Key not configured. Using lower rate limits.")
 
-# Inicializar cadeia de enriquecimento globalmente (se habilitada)
-# (Como antes)
+# Initialize enrichment chain globally (if enabled)
 if ENRICHMENT_ENABLED:
-    print("[INFO] Inicializando cadeia de enriquecimento (pode levar um tempo)...")
+    print("[INFO] Initializing enrichment chain (may take a while)...")
     try: enrichment_chain_global = get_query_enrichment_chain(); print("[INFO] Cadeia de enriquecimento pronta.")
     except Exception as e: print(f"[ERRO] Falha ao inicializar cadeia: {e}"); ENRICHMENT_ENABLED = False; enrichment_chain_global = None
 else: enrichment_chain_global = None
 
-# --- Constantes ---
+# --- Constants ---
 TARGET_COMPLETE_COUNT_DEFAULT = 4 # O número desejado de artigos completos no final
 FETCH_MULTIPLIER = 2.0            # Fator pelo qual multiplicar o alvo para busca inicial (ex: 4 * 2 = 8)
 
-# --- Funções Entrez Internas ---
+# --- Internal entrez functions ---
 # (_search_pmc_ids, _fetch_pmc_xml, _parse_single_article_xml, _parse_pmc_xml_results)
-# Mantêm-se exatamente como na versão anterior (com a extração do ano incluída)
-# Apenas como referência, a assinatura e docstring de _parse_single_article_xml:
 def _parse_single_article_xml(article_elem: ET.Element) -> Optional[Dict[str, str]]:
     """
-    Parseia um único elemento <article> do XML do PMC.
-    Retorna um dicionário com os campos OBRIGATÓRIOS (incluindo ano) ou None se campos chave faltarem.
+    Parses a single <article> element from the PMC XML.
+    Returns a dictionary with the MANDATORY fields (including year) or None if key fields are missing.
     """
-    # ... (lógica interna da função permanece a mesma, incluindo a extração do ano) ...
+    
     article_data = {}
     extracted_authors = []
 
@@ -104,7 +99,7 @@ def _parse_single_article_xml(article_elem: ET.Element) -> Optional[Dict[str, st
 # Funções _search_pmc_ids, _fetch_pmc_xml, _parse_pmc_xml_results também permanecem como antes
 
 def _search_pmc_ids(query: str, max_results: int) -> list:
-    """Busca IDs no PMC (Função interna)."""
+    """Searches for IDs in the PMC (internal function)."""
     if not query: return []
     print(f"[INFO] Buscando até {max_results} IDs no PMC para: '{query[:50]}...'")
     try:
@@ -112,34 +107,34 @@ def _search_pmc_ids(query: str, max_results: int) -> list:
         record = Entrez.read(handle)
         handle.close()
         pmc_ids = record.get("IdList", [])
-        print(f"[INFO] Encontrados {len(pmc_ids)} IDs no PMC.")
+        print(f"[INFO] Found {len(pmc_ids)} IDs in PMC.")
         return pmc_ids
     except Exception as e:
-        print(f"[ERRO] Erro durante Entrez.esearch: {e}")
+        print(f"[ERROR] Error during Entrez.esearch: {e}")
         return []
     finally:
         delay = 0.11 if NCBI_API_KEY else 0.34
         time.sleep(delay)
 
 def _fetch_pmc_xml(pmc_ids: list) -> str:
-    """Busca os detalhes (XML) para IDs do PMC (Função interna)."""
+    """Searches the details (XML) for PMC IDs (Internal function)."""
     if not pmc_ids: return ""
-    print(f"[INFO] Buscando detalhes XML para {len(pmc_ids)} IDs do PMC...")
+    print(f"[INFO] Searching for XML details for {len(pmc_ids)} IDs in PMC...")
     ids_string = ",".join(pmc_ids)
     xml_string_decoded = ""
     try:
         handle = Entrez.efetch(db="pmc", id=ids_string, rettype="xml", retmode="xml")
         xml_data_bytes = handle.read()
         handle.close()
-        print(f"[INFO] Dados XML recebidos (Tamanho: {len(xml_data_bytes)} bytes).")
+        print(f"[INFO] XML data received (Size: {len(xml_data_bytes)} bytes).")
         try:
             xml_string_decoded = xml_data_bytes.decode('utf-8')
         except UnicodeDecodeError:
-            print("[AVISO] Falha ao decodificar XML como UTF-8, tentando latin-1.")
+            print("[AVISO] Failed to decode XML as UTF-8, trying to latin-1.")
             try: xml_string_decoded = xml_data_bytes.decode('latin-1')
-            except UnicodeDecodeError: print("[ERRO] Não foi possível decodificar o XML.")
+            except UnicodeDecodeError: print("[ERRO] It was not possible to decode the XML.")
     except Exception as e:
-        print(f"[ERRO] Erro durante Entrez.efetch: {e}")
+        print(f"[ERRO] Erro during Entrez.efetch: {e}")
     finally:
         delay = 0.11 if NCBI_API_KEY else 0.34
         time.sleep(delay)
@@ -147,9 +142,9 @@ def _fetch_pmc_xml(pmc_ids: list) -> str:
 
 def _parse_pmc_xml_results(xml_string: str) -> List[Dict[str, str]]:
     """
-    Parseia a string XML completa contendo múltiplos artigos.
-    Usa _parse_single_article_xml para cada um.
-    Retorna uma lista de dicionários, cada um representando um artigo parseado com sucesso.
+    Parses the complete XML string containing multiple articles.
+    Use _parse_single_article_xml for each one.
+    Returns a list of dictionaries, each representing a successfully parsed article.
     """
     parsed_articles_list = []
     if not xml_string: return parsed_articles_list
@@ -161,159 +156,158 @@ def _parse_pmc_xml_results(xml_string: str) -> List[Dict[str, str]]:
             if parsed_data and parsed_data['pmc_id'] not in processed_pmc_ids:
                 parsed_articles_list.append(parsed_data)
                 processed_pmc_ids.add(parsed_data['pmc_id'])
-    except ET.ParseError as e: print(f"[ERRO PARSER] Erro ao parsear o XML: {e}")
-    except Exception as e: print(f"[ERRO PARSER] Erro inesperado durante parsing: {e}")
-    print(f"[INFO] Parsing concluído. Extraídos {len(parsed_articles_list)} artigos únicos.")
+    except ET.ParseError as e: print(f"[ERRO PARSER] Error when parsing XML: {e}")
+    except Exception as e: print(f"[ERRO PARSER] Unexpected error during parsing: {e}")
+    print(f"[INFO] Parsing completed. Extracted {len(parsed_articles_list)} single articles.")
     return parsed_articles_list
 
 
-# --- Função Principal Exportável (MODIFICADA) ---
+# --- Main Exportable Function  ---
 
 def search_pmc_articles(
     query: str,
-    target_count: int = TARGET_COMPLETE_COUNT_DEFAULT, # Número desejado de artigos COMPLETOS
-    fetch_multiplier: float = FETCH_MULTIPLIER       # Fator para busca inicial
+    target_count: int = TARGET_COMPLETE_COUNT_DEFAULT, # Desired number of FULL articles
+    fetch_multiplier: float = FETCH_MULTIPLIER       # Factor for initial search
 ) -> List[Dict[str, str]]:
     """
-    Busca artigos no PMC, filtra por completude e retorna um número alvo de resultados.
+    Searches for articles in PMC, filters by completeness and returns a target number of results.
 
     Args:
-        query (str): A pergunta ou tópico de busca do usuário.
-        target_count (int): O número desejado de artigos completos no resultado final.
-        fetch_multiplier (float): Fator pelo qual multiplicar target_count para
-                                  determinar quantos artigos buscar inicialmente.
+         query (str): The user's search question or topic.
+         target_count (int): The desired number of complete articles in the final result.
+         fetch_multiplier (float): Factor by which to multiply target_count to
+         determine how many articles to initially fetch.
 
     Returns:
-        List[Dict[str, str]]: Uma lista de dicionários, contendo até `target_count`
-                               artigos completos ('pmc_id', 'link', 'authors', 'title',
-                               'abstract', 'year'). Retorna lista vazia em caso de erro
-                               ou se nenhum artigo completo for encontrado.
+         List[Dict[str, str]]: A list of dictionaries, containing up to `target_count`
+         full articles ('pmc_id', 'link', 'authors', 'title',
+         'abstract', 'year'). Returns empty list in case of error
+         or if no complete article is found.
     """
-    print(f"\n--- Iniciando busca de artigos para query: '{query[:60]}...' ---")
-    print(f"[INFO] Objetivo final: {target_count} artigos completos.")
+    print(f"\n--- Starting to search for articles to query: '{query[:60]}...' ---")
+    print(f"[INFO] Final objective: {target_count} full articles.")
     search_query = query
 
-    # 1. Enriquecer a Query (se habilitado)
-    # (Lógica de enriquecimento como antes)
+    # 1. Enrich Query (if enabled)
     if ENRICHMENT_ENABLED and enrichment_chain_global:
         try:
-            print("[INFO] Tentando enriquecer a query...")
+            print("[INFO] Trying to enrich the query...")
             enriched = enrich_query(query, enrichment_chain_global)
             if enriched and enriched != query:
                 search_query = enriched
-                print(f"[INFO] Query enriquecida utilizada: '{search_query[:60]}...'")
+                print(f"[INFO] Enriched query used: '{search_query[:60]}...'")
             else:
-                 print("[INFO] Enriquecimento não alterou a query ou falhou, usando original.")
+                 print("[INFO] Enrichment did not change the query or failed, using original.")
         except Exception as enrich_e:
-            print(f"[ERRO] Erro durante o enriquecimento da query: {enrich_e}")
-            print("[INFO] Usando query original.")
+            print(f"[ERRO] Error during query enrichment: {enrich_e}")
+            print("[INFO] Using original query.")
             search_query = query
     if not search_query:
-        print("[ERRO] Query final para busca está vazia. Abortando.")
+        print("[ERRO] Final query for search is empty. Aborting.")
         return []
 
-    # 2. Calcular quantos IDs buscar inicialmente
-    # Garante que buscamos pelo menos o número alvo, e aplica o multiplicador
+    # 2. Calculate how many IDs to look for initially
+    # Ensures that we look for at least the target number, and applies the multiplier
     initial_max_results = max(target_count, int(target_count * fetch_multiplier))
-    print(f"[INFO] Buscando inicialmente até {initial_max_results} IDs para garantir a meta.")
+    print(f"[INFO] Initially searching up to {initial_max_results} IDs to guarantee the goal.")
 
-    # 3. Realizar a Busca de IDs no PMC
+    # 3. Search for IDs in the PMC
     pmc_results_ids = _search_pmc_ids(search_query, initial_max_results)
 
-    # 4. Se encontrou IDs, buscar e parsear os detalhes XML
+    # 4. If found IDs, search and parse the XML details
     all_parsed_articles: List[Dict[str, str]] = []
     if pmc_results_ids:
         articles_xml = _fetch_pmc_xml(pmc_results_ids)
         if articles_xml:
             all_parsed_articles = _parse_pmc_xml_results(articles_xml)
         else:
-             print("[AVISO] Não foi possível obter ou decodificar os dados XML dos artigos.")
+             print("[WARNIG] It was not possible to obtain or decode the XML data of the articles.")
     else:
-        print("[INFO] Nenhum ID de artigo encontrado no PMC para esta query.")
+        print("[INFO] No article ID found in PMC for this query.")
 
-    # 5. Filtrar por Completude e Limitar ao Número Alvo
+    # 5. Filter by Completeness and Limit to Target Number
     complete_articles: List[Dict[str, str]] = []
     if all_parsed_articles:
-        print(f"[INFO] Filtrando {len(all_parsed_articles)} artigos parseados para completude...")
+        print(f"[INFO] Filtering {len(all_parsed_articles)} articles parsed for completeness...")
         articles_checked = 0
         for article in all_parsed_articles:
             articles_checked += 1
-            # Verifica se todos os campos OBRIGATÓRIOS têm valores válidos (não None, não "N/A", não "")
+            # Checks that all MANDATORY fields have valid values (not None, not “N/A”, not "")
             pmc_id = article.get("pmc_id")
             title = article.get("title")
             authors = article.get("authors")
             abstract = article.get("abstract")
             year = article.get("year")
-            link = article.get("link") # Link é derivado, sempre existirá se pmc_id existir
+            link = article.get("link") # Link is derived, it will always exist if pmc_id exists
 
             is_complete = (
-                pmc_id and  # Garante que o ID existe
+                pmc_id and  # Ensures that the ID exists
                 title not in [None, "N/A", ""] and
                 authors not in [None, "N/A", ""] and
                 abstract not in [None, "N/A", ""] and
                 year not in [None, "N/A", ""]
-                # Não precisa checar 'link' pois depende do pmc_id
+                # Don't need to check ‘link’ because it depends on the pmc_id
             )
 
             if is_complete:
                 complete_articles.append(article)
                 # Verifica se já atingimos a meta
                 if len(complete_articles) >= target_count:
-                    print(f"[INFO] Meta de {target_count} artigos completos atingida após verificar {articles_checked} artigos.")
-                    break # Para de adicionar assim que a meta for cumprida
+                    print(f"[INFO] Target of {target_count} complete articles achieved after checking {articles_checked} articles.")
+                    break # Stop adding as soon as the target is met
             # else:
-                # print(f"[DEBUG] Artigo {pmc_id or 'sem ID'} descartado por dados incompletos.")
+                # print(f"[DEBUG] Article {pmc_id or 'sem ID'} discarded due to incomplete data.")
 
-        print(f"[INFO] Filtragem concluída. Encontrados {len(complete_articles)} artigos completos.")
+        print(f"[INFO] Filtering completed. Found {len(complete_articles)} complete articles.")
         if len(complete_articles) < target_count:
-            print(f"[AVISO] Não foi possível encontrar {target_count} artigos completos. Retornando {len(complete_articles)}.")
+            print(f"[WARNING] It was not possible to find {target_count} complete articles. Returning {len(complete_articles)}.")
 
     else:
-        print("[INFO] Nenhum artigo parseado para filtrar.")
+        print("[INFO] No articles parsed to filter.")
 
-    # 6. Retornar a lista de artigos completos (limitada a target_count)
-    print(f"--- Busca concluída. Retornando {len(complete_articles)} artigos completos processados. ---")
-    print(f"\n\n[INFO] Artigos completos retornados: {complete_articles[:3]}...") # Exibe os 3 primeiros para depuração
-    return complete_articles # A lista já estará limitada pelo break no loop
+    # 6. Return the list of complete articles (limited to target_count)
+    print(f"--- Search completed. Returning {len(complete_articles)} full articles processed. ---")
+    print(f"\n\n[INFO] Full articles returned: {complete_articles[:3]}...") # Displays the first 3 for debugging
+    return complete_articles # The list will already be limited by the break in the loop
 
 
-# --- Bloco de Teste (Executado apenas ao rodar o script diretamente) ---
+# --- Test Block (Only executed when running the script directly) ---
 if __name__ == "__main__":
-    print("\n" + "="*30 + " INICIANDO TESTE DO MÓDULO " + "="*30)
+    print("\n" + "="*30 + " STARTING MODULE TEST " + "="*30)
 
-    test_query = input("Digite uma query de teste (ex: 'artificial intelligence medicine'): ")
-    target_num_str = input(f"Quantos artigos COMPLETOS você deseja no final? (Padrão: {TARGET_COMPLETE_COUNT_DEFAULT}): ")
-    fetch_mult_str = input(f"Qual multiplicador usar para busca inicial? (Padrão: {FETCH_MULTIPLIER}): ")
+    test_query = input("Enter a test query (ex: 'artificial intelligence medicine'): ")
+    target_num_str = input(f"How many COMPLETE articles do you want at the end? (Default: {TARGET_COMPLETE_COUNT_DEFAULT}): ")
+    fetch_mult_str = input(f"Which multiplier to use for initial search? (Default: {FETCH_MULTIPLIER}): ")
 
     try:
         target_num = int(target_num_str) if target_num_str else TARGET_COMPLETE_COUNT_DEFAULT
     except ValueError:
-        print(f"Entrada inválida para número alvo, usando padrão {TARGET_COMPLETE_COUNT_DEFAULT}.")
+        print(f"Invalid entry for target number, using pattern {TARGET_COMPLETE_COUNT_DEFAULT}.")
         target_num = TARGET_COMPLETE_COUNT_DEFAULT
 
     try:
         fetch_mult = float(fetch_mult_str) if fetch_mult_str else FETCH_MULTIPLIER
     except ValueError:
-         print(f"Entrada inválida para multiplicador, usando padrão {FETCH_MULTIPLIER}.")
+         print(f"Invalid entry for multiplier, using pattern {FETCH_MULTIPLIER}.")
          fetch_mult = FETCH_MULTIPLIER
 
     if test_query:
-        # Chamar a função principal exportável com os parâmetros de teste
+        # Call the main exportable function with the test parameters
         results = search_pmc_articles(
             test_query,
             target_count=target_num,
             fetch_multiplier=fetch_mult
         )
 
-        print("\n" + "*"*30 + " RESULTADOS RETORNADOS PELA FUNÇÃO " + "*"*30)
+        print("\n" + "*"*30 + " RESULTS RETURNED BY FUNCTION  " + "*"*30)
         if results:
             import json
-            print(f"A função retornou {len(results)} artigos completos:")
+            print(f"The function returned {len(results)} complete articles:")
             print(json.dumps(results, indent=2))
         else:
-            print("A função retornou uma lista vazia.")
-        print("*"*30 + " FIM DOS RESULTADOS " + "*"*30)
+            print("The function returned an empty list.")
+        print("*"*30 + " END OF RESULTS  " + "*"*30)
     else:
-        print("Nenhuma query de teste fornecida.")
+        print("No test query provided.")
 
-    print("\n" + "="*30 + " FIM DO TESTE DO MÓDULO " + "="*30)
+    print("\n" + "="*30 + " END OF MODULE TEST " + "="*30)

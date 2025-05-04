@@ -9,7 +9,7 @@
 
 [![Python Version](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org) [![Streamlit](https://img.shields.io/badge/Streamlit-Deployed-orange.svg)](https://streamlit.io) [![LangGraph](https://img.shields.io/badge/LangChain-LangGraph-purple.svg)](https://python.langchain.com/docs/langgraph/) [![Azure Services](https://img.shields.io/badge/Azure-Services-blue.svg)](https://azure.microsoft.com) [![PubMed API](https://img.shields.io/badge/PubMed-Entrez%20API-lightgrey.svg)](https://www.ncbi.nlm.nih.gov/books/NBK25501/) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-**[[Test BioLit Explorer](https://biolitexplorer.streamlit.app/)]** | **[[See a Demo](https://biolitexplorer.streamlit.app/](https://drive.google.com/file/d/14Tdm538XxBCTZ5-huOnp-KwkkrWADxej/view?usp=sharing )]**
+**[[Test BioLit Explorer](https://biolitexplorer.streamlit.app/)]** | **[[See a Demo](https://drive.google.com/file/d/14Tdm538XxBCTZ5-huOnp-KwkkrWADxej/view?usp=sharing )]**
 
 ---
 

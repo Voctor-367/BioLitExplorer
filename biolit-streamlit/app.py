@@ -236,19 +236,19 @@ def show_setup_interface():
             study_title = st.text_input(
                 "Study Title",
                 key="setup_title",
-                help="Give a descriptive name to your study (e.g., 'Q1 Sales Analysis')."
+                help="Give a descriptive name to your study."
             )
             study_objective = st.text_area(
                 "Study Objective",
                 key="setup_objective",
                 height=100,
-                help="Describe the main goal or question for this analysis (e.g., 'Identify top-selling products by region')."
+                help="What is the main scientific question or objective you want to investigate with this specific analysis? Be as clear as possible about what you hope to discover or compare.\n\n Examples: **'Identify differentially expressed genes between group A and B'**, **'See if treatment X improves outcome Y compared to placebo'**, **'Find protein biomarkers that correlate with disease severity Z'**, **'Build a predictive model for recurrence risk'**. A well-defined objective guides the AI ​​to perform the most appropriate statistical analyses and visualizations, as well as better direct the literature search."
             )
             description = st.text_area(
                 "Describe your dataset",
                 key="setup_description",
                 height=100,
-                help="Provide a brief summary of the dataset content (e.g., 'Contains daily sales data including product, quantity, and value')."
+                help="Help the AI ​​agent understand your data for more accurate analysis! Briefly describe the origin and content of the dataset. Include:\n\n **1) Study Type/Design** (e.g. ‘RNA-Seq comparing Treated vs Control’, ‘Clinical trial demographics and outcomes’, ‘Proteomics of diseased vs healthy tissue’)\n\n **2) Key Columns/Variables** you are likely to analyze (e.g. ‘gene expression levels’, ‘treatment group’, ‘survival status’, ‘protein abundance’, specific names of important columns).\n\n **3) Any crucial biological/experimental context**.\n\n This information will guide the AI ​​in formulating relevant analyses and interpreting the results."
             )
             # Form submission button
             submitted = st.form_submit_button("Start Analysis")
